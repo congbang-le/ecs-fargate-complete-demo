@@ -1,1 +1,1 @@
-# eks-fargate-complete-demo
+# Demo complete set up of ECS Fargate using Terraform
