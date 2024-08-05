@@ -26,7 +26,7 @@ resource "aws_subnet" "private_subnets" {
   tags = merge(
     var.common_tags,
     {
-      Name                     = "subnet-${count.index}"
+      Name                     = "private-subnet-${count.index}"
       "kubernetes.io/role/elb" = 1
     }
   )
@@ -67,7 +67,6 @@ resource "aws_route_table_association" "private_rta" {
   route_table_id = aws_route_table.private_rtb.id
 }
 
-
 ####################### Public subnets #######################
 resource "aws_subnet" "public_subnets" {
   count                   = length(var.public_subnet_cidrs)
@@ -79,7 +78,7 @@ resource "aws_subnet" "public_subnets" {
   tags = merge(
     var.common_tags,
     {
-      Name                     = "subnet-${count.index}"
+      Name                     = "public-subnet-${count.index}"
       "kubernetes.io/role/elb" = 1
     }
   )
@@ -98,10 +97,29 @@ resource "aws_route_table" "public_rtb" {
   }
 }
 
-
 resource "aws_route_table_association" "public_rta" {
   count = length(aws_subnet.public_subnets)
 
   subnet_id      = element(aws_subnet.public_subnets.*.id, count.index)
   route_table_id = aws_route_table.public_rtb.id
 }
+
+####################### Security group #######################
+resource "aws_security_group" "sg" {
+  vpc_id = aws_vpc.vpc.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+

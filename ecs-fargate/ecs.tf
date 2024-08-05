@@ -50,5 +50,12 @@ resource "aws_ecs_service" "ecs_service" {
     subnets         = aws_subnet.private_subnets[*].id
     security_groups = [aws_security_group.sg.id]
   }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.ecs_tg.arn
+    container_name   = "frontend"
+    container_port   = 80
+  }
+
 }
 
